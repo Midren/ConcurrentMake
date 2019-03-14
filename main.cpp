@@ -1,28 +1,58 @@
 #include <iostream>
 #include <fcntl.h>
+#include <sstream>
 #include "libssh/libsshpp.hpp"
 #include "string.h"
 
-int scp_write(ssh::Session &session, std::string filename, std::string text) {
+void scp_write_file(ssh::Session &session, std::string filename, std::string text) {
     ssh_scp scp;
     scp = ssh_scp_new(session.getCSession(), SSH_SCP_WRITE, ".");
     if (scp == nullptr) {
         std::cout << "Error allocationg scp session\n";
+        throw ssh::SshException(session.getCSession());
     }
     if (ssh_scp_init(scp) != SSH_OK) {
         std::cout << "Eror initializing scp session\n";
         ssh_scp_free(scp);
+        throw ssh::SshException(session.getCSession());
     } else {
         if (ssh_scp_push_file(scp, filename.c_str(), text.length(), S_IRUSR | S_IWUSR) != SSH_OK) {
             std::cout << "Cannot push file" << std::endl;
+            throw ssh::SshException(session.getCSession());
         }
         if (ssh_scp_write(scp, text.c_str(), text.length()) != SSH_OK) {
             std::cout << "Cannot write to file" << std::endl;
+            throw ssh::SshException(session.getCSession());
         }
         ssh_scp_close(scp);
         ssh_scp_free(scp);
     }
-    return SSH_OK;
+}
+
+std::string scp_read_file(ssh::Session &session, std::string filename) {
+    ssh_scp scp;
+    scp = ssh_scp_new(session.getCSession(), SSH_SCP_READ, filename.c_str());
+    if (scp == nullptr) {
+        std::cout << "Error allocationg scp session\n";
+        throw ssh::SshException(session.getCSession());
+    }
+    if (ssh_scp_init(scp) != SSH_OK) {
+        std::cout << "Eror initializing scp session\n";
+        ssh_scp_free(scp);
+        throw ssh::SshException(session.getCSession());
+    }
+    if (ssh_scp_pull_request(scp) != SSH_SCP_REQUEST_NEWFILE) {
+        std::cout << "Erro getting info about file" << std::endl;
+        throw ssh::SshException(session.getCSession());
+    }
+    size_t size = ssh_scp_request_get_size(scp);
+    char *buffer = new char[size];
+    ssh_scp_accept_request(scp);
+    ssh_scp_read(scp, buffer, size);
+
+    ssh_scp_close(scp);
+    ssh_scp_free(scp);
+    return std::string(buffer);
 }
 
 void execute_command(ssh::Session &session, std::string cmd) {
@@ -50,9 +80,11 @@ int main() {
         std::cout << e.getError();
     }
     char *password = getpass("Password: ");
-    if (ssh_userauth_password(session.getCSession(), NULL, password) != SSH_AUTH_SUCCESS) {
+    if (ssh_userauth_password(session.getCSession(), nullptr, password) != SSH_AUTH_SUCCESS) {
         std::cout << "Wrong password";
     }
-    scp_write(session, "hello.txt", "Hello, world!\n");
+//    scp_write_file(session, "hello.txt", "Yeah, it' works\nMaybe we will end this\n");
+    execute_command(session, "echo Super > hello.txt");
+    std::cout << scp_read_file(session, "hello.txt");
     return 0;
 }
