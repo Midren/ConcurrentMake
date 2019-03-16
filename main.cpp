@@ -7,8 +7,9 @@
 
 
 int main() {
-    Node n("midren@localhost");
+    Node n("YuraYeliseev@10.10.226.136");
     n.connect();
+
     std::cout << n.execute_command("ls");
     n.scp_write_file("hello.txt", "No Problema, Houston\n");
     std::cout << n.scp_read_file("hello.txt");

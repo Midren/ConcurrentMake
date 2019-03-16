@@ -13,8 +13,9 @@ Node::~Node() {
 void Node::connect() {
     session.connect();
     is_connected = true;
-    char *password = getpass("Password: ");
-    session.userauthPassword(password);
+    if(session.userauthPublickeyAuto() != SSH_AUTH_SUCCESS) {
+        throw std::runtime_error("Didn't auth");
+    }
 }
 
 std::string Node::execute_command(std::string cmd) {
