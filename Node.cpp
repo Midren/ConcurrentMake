@@ -1,3 +1,4 @@
+#include <fstream>
 #include "Node.h"
 
 Node::Node(std::string node_name) : session(), is_connected(false) {
@@ -17,6 +18,7 @@ void Node::connect() {
         throw std::runtime_error("Didn't auth");
     }
 }
+
 
 std::string Node::execute_command(std::string cmd) {
     ssh::Channel channel(session);
@@ -52,3 +54,28 @@ std::string Node::scp_read_file(std::string filename) {
 
     return file;
 }
+
+void Node::scp_copy_file_from_user(std::string from, std::string to){
+    std::ifstream input(from, std::ios::binary);
+    if(input.is_open()){
+        input.seekg(0, std::ios::end);
+        std::ios::pos_type buf_size = input.tellg();
+        input.seekg(0);
+
+        char* buf = new char[buf_size];
+        input.read(buf, buf_size);
+        std::string output(buf);
+        free(buf);
+        Node::scp_write_file(std::move(to), output);
+    }
+    input.close();
+};
+
+void Node::scp_copy_file_from_server(std::string from, std::string to){
+    std::string input = Node::scp_read_file(from);
+    std::ofstream outfile(to, std::ios::binary);
+    outfile << input;
+    outfile.close();
+}
+
+
