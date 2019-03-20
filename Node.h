@@ -22,6 +22,11 @@ public:
 
     std::string scp_read_file(std::string filename);
 
+    void scp_copy_file_from_user(std::string from, std::string to);
+
+    void scp_copy_file_from_server(std::string from, std::string to);
+
+
 private:
     ssh::Session session;
     bool is_connected;
