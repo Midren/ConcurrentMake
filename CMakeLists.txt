@@ -9,7 +9,7 @@ FIND_PACKAGE(Threads REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_executable(concurrent_make main.cpp Scp.cpp Node.cpp)
+add_executable(concurrent_make main.cpp Scp.cpp Node.cpp server_communication.cpp server_communnication.h)
 
 target_link_libraries(concurrent_make ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES})
 target_link_libraries(concurrent_make -lssh)
