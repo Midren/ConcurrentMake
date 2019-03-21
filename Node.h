@@ -5,6 +5,7 @@
 #include "libssh/libsshpp.hpp"
 #include "string.h"
 #include <iostream>
+#include <filesystem>
 
 #include "Scp.h"
 
@@ -18,13 +19,13 @@ public:
 
     std::string execute_command(std::string cmd);
 
-    void scp_write_file(std::string filename, std::string text);
+    void scp_write_file(std::filesystem::path path_to_file, std::string text);
 
-    std::string scp_read_file(std::string filename);
+    std::string scp_read_file(std::filesystem::path path_to_file);
 
-    void scp_copy_file_from_user(std::string from, std::string to);
+    void scp_send_file(std::filesystem::path from, std::filesystem::path to);
 
-    void scp_copy_file_from_server(std::string from, std::string to);
+    void scp_download_file(std::filesystem::path from, std::filesystem::path to);
 
 
 private:
