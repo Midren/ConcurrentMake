@@ -3,8 +3,7 @@
 
 #include <fcntl.h>
 #include "libssh/libsshpp.hpp"
-#include "string.h"
-#include <iostream>
+#include <fstream>
 #include <filesystem>
 
 #include "Scp.h"

@@ -8,8 +8,9 @@ FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(SSH_Node)
 
-add_executable(concurrent_make main.cpp Scp.cpp Node.cpp server_communication.cpp server_communnication.h)
+add_executable(concurrent_make main.cpp SSH_Node/Scp.cpp SSH_Node/Node.cpp server_communication.cpp server_communnication.h)
 
 target_link_libraries(concurrent_make ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES})
 target_link_libraries(concurrent_make -lssh stdc++fs)

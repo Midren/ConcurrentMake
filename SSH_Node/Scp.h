@@ -4,8 +4,6 @@
 #include "libssh/libsshpp.hpp"
 #include <stdexcept>
 
-#include <iostream>
-
 class Scp {
 public:
     Scp(ssh::Session &session, int mode, std::string location);

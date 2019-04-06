@@ -1,4 +1,3 @@
-#include <fstream>
 #include "Node.h"
 
 Node::Node(std::string node_name) : session(), is_connected(false) {
@@ -56,7 +55,6 @@ std::string Node::scp_read_file(std::filesystem::path path_to_file) {
 }
 
 void Node::scp_send_file(std::filesystem::path from, std::filesystem::path to) {
-    std::cout << to << std::endl;
     std::ifstream input(from, std::ios::binary);
     if (input.is_open()) {
         size_t buf_size = std::filesystem::file_size(from);

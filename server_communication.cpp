@@ -1,7 +1,3 @@
-//
-// Created by YuraYeliseev on 2019-03-20.
-//
-
 #include "server_communnication.h"
 
 
