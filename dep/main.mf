@@ -1,0 +1,5 @@
+main.o: /home/midren/Documents/ucu/example_distributed/main.cpp \
+ /home/midren/Documents/ucu/example_distributed/a.h \
+ /home/midren/Documents/ucu/example_distributed/b.h \
+ /home/midren/Documents/ucu/example_distributed/c.h \
+ /home/midren/Documents/ucu/example_distributed/d.h

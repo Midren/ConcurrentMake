@@ -19,18 +19,20 @@ void Node::connect() {
 }
 
 
-std::string Node::execute_command(std::string cmd) {
+std::string Node::execute_command(std::string cmd, bool is_output) {
     ssh::Channel channel(session);
     channel.openSession();
     ssh_channel_request_pty(channel.getCChannel());
     channel.requestExec(cmd.c_str());
-    int nbytes;
-    char buffer[256];
     std::string ret;
-    nbytes = channel.read(buffer, sizeof(buffer), false, -1);
-    while (nbytes > 0) {
-        ret.append(buffer);
-        nbytes = ssh_channel_read(channel.getCChannel(), buffer, sizeof(buffer), false);
+    if (is_output) {
+        int nbytes;
+        char buffer[256];
+        nbytes = channel.read(buffer, sizeof(buffer), false, -1);
+        while (nbytes > 0) {
+            ret.append(buffer);
+            nbytes = ssh_channel_read(channel.getCChannel(), buffer, sizeof(buffer), false);
+        }
     }
     return ret;
 }

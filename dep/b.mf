@@ -1,0 +1,2 @@
+b.o: /home/midren/Documents/ucu/example_distributed/b.cpp \
+ /home/midren/Documents/ucu/example_distributed/b.h

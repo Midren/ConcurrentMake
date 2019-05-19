@@ -16,7 +16,7 @@ public:
 
     void connect();
 
-    std::string execute_command(std::string cmd);
+    std::string execute_command(std::string cmd, bool is_output);
 
     void scp_write_file(std::filesystem::path path_to_file, std::string text);
 
