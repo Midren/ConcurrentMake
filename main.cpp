@@ -36,15 +36,16 @@ void show_dependency(fs::path dir) {
     system("dot -Tpng ../dep/dep_graph.dot > dependency_graph.png");
 }
 
-void link_whole_project(fs::path working_directory) {
-    system(std::string("bash cd " + working_directory.parent_path().string() +
-                       " && /home/midren/Documents/ucu/concurrent_make/scripts/link_whole.sh").c_str());
+void link_whole_project(fs::path ccmake_directory, fs::path project_directory) {
+    system(std::string("bash cd " + project_directory.parent_path().string() + " && " +
+                       ccmake_directory.append("scripts/link_whole.sh").string()).c_str());
 }
 
 int main() {
-    fs::path working_directory("/home/midren/Documents/ucu/example_distributed/");
+    fs::path cur_directory(fs::current_path().parent_path());
+    fs::path project_directory("/home/midren/Documents/ucu/example_distributed/");
 
-//    update_ips_json();
+    update_ips_json();
     auto ips = get_ips();
     for (auto x: ips)
         std::cout << x << " ";
@@ -54,8 +55,8 @@ int main() {
 
     //  Create library with working files
     n.execute_command("rm -rf ~/.project && mkdir .project", false);
-    cp_headers(n, working_directory, fs::path("~/.project/"));
-    cp_cpp(n, working_directory, fs::path("~/.project/"));
+    cp_headers(n, project_directory, fs::path("~/.project/"));
+    cp_cpp(n, project_directory, fs::path("~/.project/"));
 
     // Make static library in remote computer
     n.scp_send_file("../scripts/generate_lib.sh", fs::path("~/.project/generate_lib.sh"));
@@ -63,13 +64,13 @@ int main() {
     n.execute_command("cd ~/.project && ./generate_lib.sh && echo 'a' ", true);
 
     // Create folder for static libraries
-    fs::current_path(working_directory);
-    working_directory.append("libs/");
-    fs::create_directories(working_directory);
+    fs::current_path(project_directory);
+    project_directory.append("libs/");
+    fs::create_directories(project_directory);
 
     // Get static library from remote computer
-    n.scp_download_file("~/.project/libs/lib1.a", working_directory.replace_filename("lib1.a"));
+    n.scp_download_file("~/.project/libs/lib1.a", project_directory.replace_filename("lib1.a"));
 
-    link_whole_project(working_directory.parent_path());
+    link_whole_project(cur_directory, project_directory.parent_path());
     return 0;
 }
