@@ -1,0 +1,2 @@
+Scp.o: /home/midren/Documents/ucu/concurrent_make/SSH_Node/Scp.cpp \
+ /home/midren/Documents/ucu/concurrent_make/SSH_Node/Scp.h

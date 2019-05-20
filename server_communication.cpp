@@ -1,4 +1,4 @@
-#include "server_communnication.h"
+#include "server_communication.h"
 
 
 void update_ips_json() {

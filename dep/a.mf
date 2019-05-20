@@ -1,2 +1,0 @@
-a.o: /home/midren/Documents/ucu/example_distributed/a.cpp \
- /home/midren/Documents/ucu/example_distributed/a.h

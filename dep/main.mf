@@ -1,5 +1,5 @@
-main.o: /home/midren/Documents/ucu/example_distributed/main.cpp \
- /home/midren/Documents/ucu/example_distributed/a.h \
- /home/midren/Documents/ucu/example_distributed/b.h \
- /home/midren/Documents/ucu/example_distributed/c.h \
- /home/midren/Documents/ucu/example_distributed/d.h
+main.o: /home/midren/Documents/ucu/concurrent_make/main.cpp \
+ /home/midren/Documents/ucu/concurrent_make/server_communication.h \
+ /home/midren/Documents/ucu/concurrent_make/dependecies_parser.h \
+ /home/midren/Documents/ucu/concurrent_make/SSH_Node/Node.h \
+ /home/midren/Documents/ucu/concurrent_make/SSH_Node/Scp.h

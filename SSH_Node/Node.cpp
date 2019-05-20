@@ -51,21 +51,17 @@ std::string Node::scp_read_file(std::filesystem::path path_to_file) {
     }
 
     scp.accept_request();
+    scp.pull_request();
     std::string file = scp.read();
 
     return file;
 }
 
 void Node::scp_send_file(std::filesystem::path from, std::filesystem::path to) {
-    std::ifstream input(from, std::ios::binary);
+    std::ifstream input(from, std::ifstream::binary);
     if (input.is_open()) {
-        size_t buf_size = std::filesystem::file_size(from);
-        char *buf = new char[buf_size];
-        input.read(buf, buf_size);
-
-        std::string output(buf);
-        free(buf);
-        Node::scp_write_file(to, output);
+        std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << input.rdbuf()).str();
+        Node::scp_write_file(to, data);
     }
     input.close();
 };

@@ -43,7 +43,7 @@ std::string Scp::read() {
         free(buffer);
         throw std::runtime_error("Error receiving file data");
     }
-    std::string ret(buffer);
+    std::string ret(buffer, size);
     free(buffer);
     return ret;
 }
