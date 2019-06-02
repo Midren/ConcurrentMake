@@ -12,5 +12,6 @@ include_directories(SSH_Node)
 
 add_executable(concurrent_make main.cpp SSH_Node/Scp.cpp SSH_Node/Node.cpp server_communication.cpp dependecies_parser.cpp ccmake.cpp)
 
+
 target_link_libraries(concurrent_make ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES} ${Boost_FILESYSTEM_LIBRARIES})
 target_link_libraries(concurrent_make -lssh stdc++fs)
