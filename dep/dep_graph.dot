@@ -1,0 +1,15 @@
+digraph {
+CMakeCXXCompilerId->CMakeCXXCompilerId;
+Node_->Node_;
+Node_->Scp;
+Scp->Scp;
+ccmake->ccmake;
+dependecies_parser->dependecies_parser;
+dependecies_parser->dependecies_parser;
+main->server_communication;
+main->dependecies_parser;
+main->Node_;
+main->Scp;
+server_communication->server_communication;
+server_communication->server_communication;
+}

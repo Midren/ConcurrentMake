@@ -1,0 +1,3 @@
+Node.o: /home/midren/Documents/ucu/concurrent_make/SSH_Node/Node.cpp \
+ /home/midren/Documents/ucu/concurrent_make/SSH_Node/Node.h \
+ /home/midren/Documents/ucu/concurrent_make/SSH_Node/Scp.h
