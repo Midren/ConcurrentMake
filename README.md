@@ -32,5 +32,7 @@ concurrent_make <path to ccmake.txt>
 
 # Contributors
 Roman Milishchuk [@RomanMilishchuk](https://github.com/RomanMilishchuk)
+
 Yurii Yelisiesiev [@YuraYelisiesiev](https://github.com/YuraYelisieiev)
+
 Danylo Kolinko [@Kolinko-Danylo](https://github.com/Kolinko-Danylo)
