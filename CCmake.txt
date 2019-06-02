@@ -1,3 +1,4 @@
-CFLAGS= -O3
-HEADERS=
-EXE=main.cpp
+EXE=test_main.cpp
+SOURCES=ccmake.cpp
+HEADERS=ccmake.h
+FLAGS= -O3
