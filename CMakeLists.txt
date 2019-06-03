@@ -10,8 +10,12 @@ FIND_PACKAGE(Threads REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(SSH_Node)
 
+
+add_executable(ipS background_commun.cpp background_commun.h)
+target_link_libraries(ipS ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES})
+
 add_executable(concurrent_make main.cpp SSH_Node/Scp.cpp SSH_Node/Node.cpp server_communication.cpp dependecies_parser.cpp ccmake.cpp)
-
-
 target_link_libraries(concurrent_make ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES} ${Boost_FILESYSTEM_LIBRARIES})
 target_link_libraries(concurrent_make -lssh stdc++fs)
+
+

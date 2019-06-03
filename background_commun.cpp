@@ -13,13 +13,18 @@
 #include <fstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+
 
 std::pair<std::string, std::string> get_public_key_and_login() {
     std::ifstream public_key_file{std::string(getenv("HOME")) + "/.ssh/id_rsa.pub"};
     std::string current, public_key, login;
     int iter = 0;
     while (std::getline(public_key_file, current, ' ')) {
-        std::cout << current << std::endl;
         switch (iter) {
             case 1: {
                 public_key = current;
@@ -122,6 +127,42 @@ void get_local_ip() {
     }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+
+
+
+    pid_t pid, sid;
+
+    //Fork the Parent Process
+    pid = fork();
+
+    if (pid < 0) { exit(EXIT_FAILURE); }
+
+    //We got a good pid, Close the Parent Process
+    if (pid > 0) { exit(EXIT_SUCCESS); }
+
+    //Change File Mask
+    umask(0);
+
+    //Create a new Signature Id for our child
+    sid = setsid();
+    if (sid < 0) { exit(EXIT_FAILURE); }
+
+    //Change Directory
+    //If we cant find the directory we exit with failure.
+    if ((chdir("/")) < 0) { exit(EXIT_FAILURE); }
+
+    //Close Standard File Descriptors
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
+    //----------------
+    //Main Process
+    //----------------
     get_local_ip();
+
+
+
+
 }
