@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Daemon Name: ipS
+# Daemon Name: ccmake_node
 #
 # chkconfig: - 58 74
 # description: Our Script
@@ -9,13 +9,13 @@
 . /etc/init.d/functions
 
 
-prog=ipS
+prog=ccmake_node
 lockfile=newlib/$prog
 
 start() {
     #Make some checks for requirements before continuing
     [ -x /usr/sbin/$prog ] || exit 5
-
+    echo "2"
     # Start our daemon daemon
     echo -n $"Starting $prog: "
     daemon --pidfile /var/run/${proc}.pid $prog
