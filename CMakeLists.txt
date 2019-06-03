@@ -10,7 +10,6 @@ FIND_PACKAGE(Threads REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(SSH_Node)
 
-
 add_executable(ipS background_commun.cpp background_commun.h)
 target_link_libraries(ipS ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARIES})
 
