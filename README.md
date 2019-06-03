@@ -13,9 +13,12 @@ cd build
 cmake ..
 make
 ```
+
 # Using 
  ## Starting node on your computer
- TODO: write how to run daemon
+ ```sh
+ ./ccmake_node.sh start
+ ```
  ## Compiling
  In your project create ccmake.txt file with next options
  ```

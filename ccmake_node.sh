@@ -14,8 +14,11 @@ lockfile=newlib/$prog
 
 start() {
     #Make some checks for requirements before continuing
-    [ -x /usr/sbin/$prog ] || exit 5
-    echo "2"
+    if ! [ -x /usr/sbin/$prog ]
+    then
+        echo "No such file: /usr/sbin/$prog"
+        exit 5
+    fi
     # Start our daemon daemon
     echo -n $"Starting $prog: "
     daemon --pidfile /var/run/${proc}.pid $prog
