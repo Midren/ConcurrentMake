@@ -20,7 +20,7 @@ static const std::string website = "yeliseev.pythonanywhere.com";
 
 void get(std::string target, std::string output_file);
 std::vector<std::string> get_public_keys(std::string input_file);
-std::string put_ip(std::string &login, std::string &ip, std::string &public_key, std::string& linux_dist, std::string& compiler, std::string& major, std::string& minor);
+std::string put_ip(std::string &login, std::string &ip, std::string &public_key, std::string& linux_dist, std::string& compiler, int major, int minor);
 
 
 

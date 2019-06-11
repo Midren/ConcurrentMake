@@ -5,7 +5,7 @@
 #include <string>
 #include <tuple>
 
-std::tuple<std::string, std::string, std::string> compiler_version();
+std::tuple<std::string, int, int> compiler_version();
 std::string get_os();
 std::pair<std::string,std::string> get_public_key_and_login();
 

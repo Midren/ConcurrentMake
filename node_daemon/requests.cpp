@@ -41,15 +41,15 @@ std::vector<std::string> get_public_keys(std::string input_file) {
 }
 
 
-std::string put_ip(std::string &login, std::string &ip, std::string &public_key, std::string& linux_dist, std::string& compiler, std::string& major, std::string& minor) {
+std::string put_ip(std::string &login, std::string &ip, std::string &public_key, std::string& linux_dist, std::string& compiler, int major, int minor) {
     boost::property_tree::ptree root;
     root.put("login", login);
     root.put("ip", ip);
     root.put("public_key", public_key);
-    root.put("os", linux_dist);
-    root.put("compiler", compiler);
-    root.put("major", major);
-    root.put("minor", minor);
+    root.put("os_name", linux_dist);
+    root.put("compiler_name", compiler);
+    root.put("major_version", major);
+    root.put("minor_version", minor);
 
 
     std::ostringstream buf;

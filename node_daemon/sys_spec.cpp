@@ -13,30 +13,30 @@ std::string get_os(){
     return std::string(name.sysname);
 }
 
-std::tuple<std::string, std::string, std::string> compiler_version(){
+std::tuple<std::string, int, int> compiler_version(){
     std::string compiler;
-    std::string minor;
-    std::string major;
+    int minor = 0;
+    int major = 0;
     #if defined(__clang__)
     /* Clang/LLVM. ---------------------------------------------- */
     compiler = std::string{__clang__};
-    major = std::to_string(__clang_major__);
-    minor = std::to_string(__clang_minor__);
+    major = __clang_major__;
+    minor = __clang_minor__;
     #elif defined(__ICC) || defined(__INTEL_COMPILER)
     /* Intel ICC/ICPC. ------------------------------------------ */
     compiler = std::string{"ICC"};
-    major = std::to_string(__INTEL_COMPILER/100);
-    minor = std::to_string(__INTEL_COMPILER%100)
+    major = __INTEL_COMPILER/100;
+    minor = __INTEL_COMPILER%100;
     #elif defined(__GNUC__) || defined(__GNUG__)
     /* GNU GCC/G++. --------------------------------------------- */
     compiler = std::string{"GCC"};
-    major = std::to_string(__GNUC__);
-    minor = std::to_string(__GNUC_MINOR__);
+    major = __GNUC__;
+    minor = __GNUC_MINOR__;
     #elif defined(_MSC_VER)
     /* Microsoft Visual Studio. --------------------------------- */
     compiler = std::string{"MVS "}
-    major = std::to_string(_MSC_VER/100);
-    minor = std::to_string(_MSC_VER%100)    
+    major = _MSC_VER/100;
+    minor = _MSC_VER%100;    
     #endif
     return std::make_tuple(compiler, major, minor);
 }
