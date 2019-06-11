@@ -1,8 +1,7 @@
 #include "server_communication.h"
 
 
-void update_ips_json() {
-    std::string target = "/get_ips";
+void update_ips_json(std::string target = "/get_ips") {
     boost::asio::io_context ioc;
     boost::asio::ip::tcp::resolver resolver(ioc);
     boost::asio::ip::tcp::socket socket(ioc);

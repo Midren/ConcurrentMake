@@ -10,9 +10,13 @@
 #include <boost/asio.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/filesystem.hpp>
 
 namespace http = boost::beast::http;
-static const std::string website = "yeliseev.pythonanywhere.com";
+
+
 
 
 #endif //CONCURRENT_MAKE_BACKGROUND_COMMUN_H
+
+

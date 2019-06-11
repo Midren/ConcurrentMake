@@ -1,0 +1,66 @@
+#include <sys/utsname.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <tuple>
+#include <iostream>
+#include <fstream>
+
+std::string get_os(){
+    std::string linux_dist;
+    struct utsname name;
+    if(uname(&name)) throw(std::runtime_error("Error while defining OS characteristics"));
+    return std::string(name.sysname);
+}
+
+std::tuple<std::string, std::string, std::string> compiler_version(){
+    std::string compiler;
+    std::string minor;
+    std::string major;
+    #if defined(__clang__)
+    /* Clang/LLVM. ---------------------------------------------- */
+    compiler = std::string{__clang__};
+    major = std::to_string(__clang_major__);
+    minor = std::to_string(__clang_minor__);
+    #elif defined(__ICC) || defined(__INTEL_COMPILER)
+    /* Intel ICC/ICPC. ------------------------------------------ */
+    compiler = std::string{"ICC"};
+    major = std::to_string(__INTEL_COMPILER/100);
+    minor = std::to_string(__INTEL_COMPILER%100)
+    #elif defined(__GNUC__) || defined(__GNUG__)
+    /* GNU GCC/G++. --------------------------------------------- */
+    compiler = std::string{"GCC"};
+    major = std::to_string(__GNUC__);
+    minor = std::to_string(__GNUC_MINOR__);
+    #elif defined(_MSC_VER)
+    /* Microsoft Visual Studio. --------------------------------- */
+    compiler = std::string{"MVS "}
+    major = std::to_string(_MSC_VER/100);
+    minor = std::to_string(_MSC_VER%100)    
+    #endif
+    return std::make_tuple(compiler, major, minor);
+}
+
+
+std::pair<std::string,std::string> get_public_key_and_login() {
+    std::ifstream public_key_file{std::string(getenv("HOME")) + "/.ssh/id_rsa.pub"};
+    std::string current, public_key, login;
+    int iter = 0;
+    while (std::getline(public_key_file, current, ' ')) {
+        switch (iter) {
+            case 1: {
+                public_key = current;
+                break;
+            }
+            case 2: {
+                login = current.substr(0, current.find('@'));
+                break;
+            }
+            default:
+                break;
+
+        }
+        ++iter;
+    }
+    return make_pair(public_key, login);
+}
