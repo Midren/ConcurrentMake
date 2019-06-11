@@ -1,31 +1,29 @@
-//
-// Created by danylo.kolinko on 5/19/19.
-//
+#include <iostream>
+#include <fstream>
+#include <cstring>
 
 #include "background_commun.h"
-#include <iostream>
-#include <cstring>
-#include <errno.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fstream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include "requests.h"
+#include "sys_spec.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include "requests.h"
-#include "sys_spec.h"
+#include <errno.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 
 void get_local_ip() {
-    while(true) {
-        const char *google_dns_server = "8.8.8.8";
+    while (true) {
+        std::string google_dns_server = "8.8.8.8";
         int dns_port = 53;
 
         struct sockaddr_in serv;
@@ -33,12 +31,12 @@ void get_local_ip() {
 
         //Socket could not be created
         if (sock < 0) {
-            std::cout << "Socket error" << std::endl;
+            std::cerr << "Socket error" << std::endl;
         }
 
         memset(&serv, 0, sizeof(serv));
         serv.sin_family = AF_INET;
-        serv.sin_addr.s_addr = inet_addr(google_dns_server);
+        serv.sin_addr.s_addr = inet_addr(google_dns_server.c_str());
         serv.sin_port = htons(dns_port);
 
         int err = connect(sock, (const struct sockaddr *) &serv, sizeof(serv));
@@ -49,43 +47,31 @@ void get_local_ip() {
 
         struct sockaddr_in name;
         socklen_t namelen = sizeof(name);
-        err = getsockname(sock, (struct sockaddr *) &name, &namelen);
+        getsockname(sock, (struct sockaddr *) &name, &namelen);
 
         char buffer[80];
         const char *p = inet_ntop(AF_INET, &name.sin_addr, buffer, 80);
         if (p != nullptr) {
             std::string ip{buffer};
-            auto params = get_public_key_and_login();
-            std::string public_key = params.first;
-            std::string login = params.second;
+            auto[public_key, login] = get_public_key_and_login();
             std::string linux_dist = get_os();
-            auto compiler = compiler_version();
-            put_ip(login, ip, public_key, linux_dist, std::get<0>(compiler), std::get<1>(compiler), std::get<2>(compiler));
+            auto[compiler, major, minor] = compiler_version();
+            put_ip(login, ip, public_key, linux_dist, compiler, major, minor);
 
-            std::string target = "/get_public_keys";
-            std::string outfile = "outfile.json";
-
-            get(target, outfile);
-            auto result = get_public_keys(outfile);
+            auto public_keys_json = get("/get_public_keys");
+            auto result = get_public_keys(public_keys_json);
             std::string extract_to{std::string(getenv("HOME")) + "/.ssh/authorized_keys"};
 
-            if ( !boost::filesystem::exists( extract_to ) )
-            {
-                boost::filesystem::ofstream( extract_to+std::string("1"));
-                boost::filesystem::rename(extract_to+std::string("1"), extract_to);
-            }
             std::ofstream authorized_key_files(extract_to);
-            for (std::string& s : result){
-                if (!s.empty()){
-                    authorized_key_files << "ssh-rsa "<< s << std::endl;
-                }
-            }
+            for (std::string &s : result)
+                if (!s.empty())
+                    authorized_key_files << "ssh-rsa " << s << std::endl;
 
-            
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            std::this_thread::sleep_for(std::chrono::seconds(30));
         } else {
-            std::cout << "Error number: " << errno
-                      << ". Error message: " << strerror(errno) << std::endl;
+            std::cerr << "Error: " << errno << std::endl
+                      << " Error message: " << strerror(errno) << std::endl;
         }
 
         close(sock);
@@ -127,9 +113,8 @@ int main(int argc, char *argv[]) {
     //----------------
     */
     get_local_ip();
-    
+
     return 0;
-    
 
 
 }

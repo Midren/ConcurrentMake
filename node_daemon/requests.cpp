@@ -1,7 +1,7 @@
 #include "requests.h"
 
 
-void get(std::string target = "/get_public_keys", std::string output_file = "output.json") {
+std::string get(std::string target) {
     boost::asio::io_context ioc;
     boost::asio::ip::tcp::resolver resolver(ioc);
     boost::asio::ip::tcp::socket socket(ioc);
@@ -15,25 +15,23 @@ void get(std::string target = "/get_public_keys", std::string output_file = "out
 
 
     boost::beast::flat_buffer buffer;
-    http::response<http::string_body > res;
+    http::response<http::string_body> res;
     http::read(socket, buffer, res);
     std::string res_body = res.body();
     socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
 
-    std::ofstream json_file(output_file);
-    json_file << res_body;
-    json_file.close();
+    return res_body;
 }
 
-std::vector<std::string> get_public_keys(std::string input_file) {
+std::vector<std::string> get_public_keys(std::string &input_json) {
     boost::property_tree::ptree pt;
-    boost::property_tree::read_json(input_file, pt);
+    std::istringstream is(input_json);
+    boost::property_tree::read_json(is, pt);
 
     pt = pt.get_child("public_keys");
     std::vector<std::string> addresses;
-    for(boost::property_tree::ptree::iterator iter = pt.begin(); iter != pt.end(); iter++)
-    {
-        for (auto &i: iter->second){
+    for (boost::property_tree::ptree::iterator iter = pt.begin(); iter != pt.end(); iter++) {
+        for (auto &i: iter->second) {
             addresses.push_back(i.second.data());
         }
     }
@@ -41,7 +39,9 @@ std::vector<std::string> get_public_keys(std::string input_file) {
 }
 
 
-std::string put_ip(std::string &login, std::string &ip, std::string &public_key, std::string& linux_dist, std::string& compiler, int major, int minor) {
+std::string
+put_ip(std::string &login, std::string &ip, std::string &public_key, std::string &linux_dist, std::string &compiler,
+       int major, int minor) {
     boost::property_tree::ptree root;
     root.put("login", login);
     root.put("ip", ip);
