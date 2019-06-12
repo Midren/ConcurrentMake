@@ -1,11 +1,20 @@
 #include "server_communication.h"
+#include <algorithm>
+#include <vector>
+#include <iostream>
 
+std::string params_to_url(std::map<std::string, std::string> params) {
+    return "?" + std::accumulate(params.begin(), params.end(), std::string{}, [](std::string prev, auto param) {
+        return std::move(prev) + param.first + "=" + param.second + "&";
+    });
+}
 
-void update_ips_json(std::string target = "/get_ips") {
+void update_ips_json(std::string target, std::map<std::string, std::string> params) {
     boost::asio::io_context ioc;
     boost::asio::ip::tcp::resolver resolver(ioc);
     boost::asio::ip::tcp::socket socket(ioc);
 
+    target += params_to_url(params);
     boost::asio::connect(socket, resolver.resolve(website, "80"));
     http::request<http::string_body> req(http::verb::get, target, 11);
     req.set(http::field::host, website);
@@ -15,7 +24,7 @@ void update_ips_json(std::string target = "/get_ips") {
 
 
     boost::beast::flat_buffer buffer;
-    http::response<http::string_body > res;
+    http::response<http::string_body> res;
     http::read(socket, buffer, res);
     std::string res_body = res.body();
     socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
@@ -31,11 +40,10 @@ std::vector<std::string> get_ips() {
 
     pt = pt.get_child("addresses");
     std::vector<std::string> addresses;
-    for(boost::property_tree::ptree::iterator iter = pt.begin(); iter != pt.end(); iter++)
-    {
-       for (auto &i: iter->second){
-           addresses.push_back(i.second.data());
-       }
+    for (boost::property_tree::ptree::iterator iter = pt.begin(); iter != pt.end(); iter++) {
+        for (auto &i: iter->second) {
+            addresses.push_back(i.second.data());
+        }
     }
     return addresses;
 }
