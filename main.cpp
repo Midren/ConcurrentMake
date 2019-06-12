@@ -6,6 +6,7 @@
 #include "SSH_Node/Node.h"
 #include "ccmake.h"
 #include "node_daemon/sys_spec.h"
+#include "node_daemon/requests.h"
 
 namespace fs = std::filesystem;
 
@@ -49,9 +50,15 @@ void link_whole_project(fs::path ccmake_directory, fs::path project_directory) {
 int main(int argc, char **argv) {
     fs::path cur_directory(fs::current_path().parent_path());
     fs::path project_directory(static_cast<std::string>(argv[1]));
+
+    // Get config from CCmake.txt
     auto args = getCcmakeArgs(project_directory.string());
     project_directory = project_directory.parent_path();
 
+    // Create folder for static libraries
+    fs::create_directories(project_directory / "libs");
+
+    //Filter all ndoes and get which are appropriate for your computer
     auto os_name = get_os();
     auto[compiler, major, minor] = compiler_version();
     std::map<std::string, std::string>
@@ -60,8 +67,8 @@ int main(int argc, char **argv) {
                       {"minor_version", std::to_string(minor)},
                       {"os_name",       os_name}};
 
-    update_ips_json("/get_ips", params);
-    auto ips = get_ips();
+    auto ip_json = get("/get_ips", params);
+    auto ips = get_all_fields(ip_json, "addresses");
 
     std::vector<std::string> sources, headers;
     boost::split(headers, args->headers, boost::is_any_of(","));
@@ -81,15 +88,10 @@ int main(int argc, char **argv) {
     n.execute_command("chmod +x ~/.project/generate_lib.sh", false);
     n.execute_command("cd ~/.project && ./generate_lib.sh && echo 'a' ", true);
 
-    // Create folder for static libraries
-    fs::current_path(project_directory);
-    fs::create_directories(project_directory / "libs");
-    project_directory.append("libs/");
-
     // Get static library from remote computer
-    n.scp_download_file("~/.project/libs/lib1.a", project_directory.replace_filename("lib1.a"));
-//    }
+    n.scp_download_file("~/.project/libs/lib1.a", project_directory / "libs" / "lib1.a");
 
-    link_whole_project(cur_directory, project_directory);
+    fs::current_path(project_directory);
+    link_whole_project(cur_directory, project_directory / "libs");
     return 0;
 }

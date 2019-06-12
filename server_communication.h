@@ -11,7 +11,7 @@
 #include <boost/property_tree/json_parser.hpp>
 
 namespace http = boost::beast::http;
-static const std::string website = "yeliseev.pythonanywhere.com";
+//static const std::string website = "yeliseev.pythonanywhere.com";
 
 
 void update_ips_json(std::string target, std::map<std::string, std::string>);

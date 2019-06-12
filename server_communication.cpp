@@ -3,18 +3,11 @@
 #include <vector>
 #include <iostream>
 
-std::string params_to_url(std::map<std::string, std::string> params) {
-    return "?" + std::accumulate(params.begin(), params.end(), std::string{}, [](std::string prev, auto param) {
-        return std::move(prev) + param.first + "=" + param.second + "&";
-    });
-}
-
 void update_ips_json(std::string target, std::map<std::string, std::string> params) {
     boost::asio::io_context ioc;
     boost::asio::ip::tcp::resolver resolver(ioc);
     boost::asio::ip::tcp::socket socket(ioc);
 
-    target += params_to_url(params);
     boost::asio::connect(socket, resolver.resolve(website, "80"));
     http::request<http::string_body> req(http::verb::get, target, 11);
     req.set(http::field::host, website);

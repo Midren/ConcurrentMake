@@ -1,11 +1,18 @@
 #include "requests.h"
 
+std::string params_to_url(std::map<std::string, std::string> params) {
+    return "?" + std::accumulate(params.begin(), params.end(), std::string{}, [](std::string prev, auto param) {
+        return std::move(prev) + param.first + "=" + param.second + "&";
+    });
+}
 
-std::string get(std::string target) {
+
+std::string get(std::string target, std::map<std::string, std::string> params) {
     boost::asio::io_context ioc;
     boost::asio::ip::tcp::resolver resolver(ioc);
     boost::asio::ip::tcp::socket socket(ioc);
 
+    target += params_to_url(params);
     boost::asio::connect(socket, resolver.resolve(website, "80"));
     http::request<http::string_body> req(http::verb::get, target, 11);
     req.set(http::field::host, website);
@@ -23,12 +30,12 @@ std::string get(std::string target) {
     return res_body;
 }
 
-std::vector<std::string> get_public_keys(std::string &input_json) {
+std::vector<std::string> get_all_fields(std::string &input_json, std::string field) {
     boost::property_tree::ptree pt;
     std::istringstream is(input_json);
     boost::property_tree::read_json(is, pt);
 
-    pt = pt.get_child("public_keys");
+    pt = pt.get_child(field);
     std::vector<std::string> addresses;
     for (boost::property_tree::ptree::iterator iter = pt.begin(); iter != pt.end(); iter++) {
         for (auto &i: iter->second) {
@@ -39,7 +46,8 @@ std::vector<std::string> get_public_keys(std::string &input_json) {
 }
 
 
-std::string put_ip(std::string &login, std::string &ip, std::string &public_key, std::string &linux_dist, std::string &compiler,
+std::string
+put_ip(std::string &login, std::string &ip, std::string &public_key, std::string &linux_dist, std::string &compiler,
        int major, int minor) {
     boost::property_tree::ptree root;
     root.put("login", login);
