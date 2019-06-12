@@ -5,6 +5,7 @@
 #include "dependecies_parser.h"
 #include "SSH_Node/Node.h"
 #include "ccmake.h"
+#include "node_daemon/sys_spec.h"
 
 namespace fs = std::filesystem;
 
@@ -46,49 +47,49 @@ void link_whole_project(fs::path ccmake_directory, fs::path project_directory) {
 }
 
 int main(int argc, char **argv) {
-    if (argc < 2) {
-        std::cout << "Specify path to ccmake.txt" << std::endl;
-        std::cout << "Usage: concurrent_make <path to ccmake.txt" << std::endl;
-    }
     fs::path cur_directory(fs::current_path().parent_path());
     fs::path project_directory(static_cast<std::string>(argv[1]));
     auto args = getCcmakeArgs(project_directory.string());
     project_directory = project_directory.parent_path();
-//    fs::path project_directory("/home/midren/Documents/ucu/example_distributed/");
 
-//    update_ips_json();
+    auto os_name = get_os();
+    auto[compiler, major, minor] = compiler_version();
+    std::map<std::string, std::string>
+            params = {{"compiler_name", compiler},
+                      {"major_version", std::to_string(major)},
+                      {"minor_version", std::to_string(minor)},
+                      {"os_name",       os_name}};
+
+    update_ips_json("/get_ips", params);
     auto ips = get_ips();
-    for (auto x: ips)
-        std::cout << x << " ";
-    std::cout << std::endl;
-    Node n(ips[0]);
-    n.connect();
 
     std::vector<std::string> sources, headers;
     boost::split(headers, args->headers, boost::is_any_of(","));
     boost::split(sources, args->sources, boost::is_any_of(","));
 
+    Node n(ips[0]);
+    n.connect();
+
     //  Create library with working files
     n.execute_command("rm -rf ~/.project && mkdir .project", false);
-//    cp_headers(n, project_directory, fs::path("~/.project/"));
-//    cp_cpp(n, project_directory, fs::path("~/.project/"));
     cp_files(n, sources, project_directory, fs::path("~/.project/"));
     cp_files(n, headers, project_directory, fs::path("~/.project/"));
 
 
-//    // Make static library in remote computer
+    // Make static library in remote computer
     n.scp_send_file("../scripts/generate_lib.sh", fs::path("~/.project/generate_lib.sh"));
     n.execute_command("chmod +x ~/.project/generate_lib.sh", false);
     n.execute_command("cd ~/.project && ./generate_lib.sh && echo 'a' ", true);
 
-//    // Create folder for static libraries
+    // Create folder for static libraries
     fs::current_path(project_directory);
+    fs::create_directories(project_directory / "libs");
     project_directory.append("libs/");
-    fs::create_directories(project_directory);
 
-//    // Get static library from remote computer
+    // Get static library from remote computer
     n.scp_download_file("~/.project/libs/lib1.a", project_directory.replace_filename("lib1.a"));
+//    }
 
-    link_whole_project(cur_directory, project_directory.parent_path());
+    link_whole_project(cur_directory, project_directory);
     return 0;
 }
