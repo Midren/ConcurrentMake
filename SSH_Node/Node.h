@@ -12,6 +12,8 @@ class Node {
 public:
     explicit Node(std::string node_name);
 
+    Node(const Node &node);
+
     ~Node();
 
     void connect();

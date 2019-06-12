@@ -1,5 +1,6 @@
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 
 #include "server_communication.h"
 #include "dependecies_parser.h"
@@ -47,6 +48,30 @@ void link_whole_project(fs::path ccmake_directory, fs::path project_directory) {
                        ccmake_directory.append("scripts/link_whole.sh").string()).c_str());
 }
 
+void compile_to_static_lib(Node &n, std::vector<std::string> headers, std::vector<std::string> sources,
+                           fs::path project_directory, int num) {
+    //  Create library with working files
+    n.execute_command("rm -rf ~/.project && mkdir .project", false);
+    cp_files(n, sources, project_directory, fs::path("~/.project/"));
+    cp_files(n, headers, project_directory, fs::path("~/.project/"));
+
+
+    // Make static library in remote computer
+    n.scp_send_file("../scripts/generate_lib.sh", fs::path("~/.project/generate_lib.sh"));
+    n.execute_command("chmod +x ~/.project/generate_lib.sh", false);
+    n.execute_command("cd ~/.project && ./generate_lib.sh && echo 'a' ", true);
+
+    // Get static library from remote computer
+    n.scp_download_file("~/.project/libs/lib1.a", project_directory / "libs" / ("lib" + std::to_string(num) + ".a"));
+}
+
+std::vector<std::vector<std::string>> split_vector(std::vector<std::string> vec, size_t num) {
+    std::vector<std::vector<std::string>> splitted_vectors(num, std::vector<std::string>{});
+    for (size_t i = 0; i < vec.size(); i++)
+        splitted_vectors[i % num].push_back(vec[i]);
+    return splitted_vectors;
+};
+
 int main(int argc, char **argv) {
     fs::path cur_directory(fs::current_path().parent_path());
     fs::path project_directory(static_cast<std::string>(argv[1]));
@@ -74,23 +99,16 @@ int main(int argc, char **argv) {
     boost::split(headers, args->headers, boost::is_any_of(","));
     boost::split(sources, args->sources, boost::is_any_of(","));
 
-    Node n(ips[0]);
-    n.connect();
-
-    //  Create library with working files
-    n.execute_command("rm -rf ~/.project && mkdir .project", false);
-    cp_files(n, sources, project_directory, fs::path("~/.project/"));
-    cp_files(n, headers, project_directory, fs::path("~/.project/"));
-
-
-    // Make static library in remote computer
-    n.scp_send_file("../scripts/generate_lib.sh", fs::path("~/.project/generate_lib.sh"));
-    n.execute_command("chmod +x ~/.project/generate_lib.sh", false);
-    n.execute_command("cd ~/.project && ./generate_lib.sh && echo 'a' ", true);
-
-    // Get static library from remote computer
-    n.scp_download_file("~/.project/libs/lib1.a", project_directory / "libs" / "lib1.a");
-
+    std::vector<Node> nodes{};
+    nodes.reserve(ips.size());
+    for (auto &ip: ips)
+        nodes.emplace_back(ip);
+    int i = 0;
+    std::vector<std::vector<std::string>> splitted_sources = split_vector(sources, nodes.size());
+    for (auto &n: nodes) {
+        n.connect();
+        compile_to_static_lib(n, headers, sources, project_directory, i++);
+    }
     fs::current_path(project_directory);
     link_whole_project(cur_directory, project_directory / "libs");
     return 0;

@@ -1,5 +1,10 @@
 #include "Node.h"
 
+Node::Node(const Node &node) {
+    this->session.optionsCopy(node.session);
+    this->is_connected = node.is_connected;
+}
+
 Node::Node(std::string node_name) : session(), is_connected(false) {
     session.setOption(SSH_OPTIONS_HOST, node_name.c_str());
 };
