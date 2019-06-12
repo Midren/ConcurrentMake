@@ -39,8 +39,7 @@ std::vector<std::string> get_public_keys(std::string &input_json) {
 }
 
 
-std::string
-put_ip(std::string &login, std::string &ip, std::string &public_key, std::string &linux_dist, std::string &compiler,
+std::string put_ip(std::string &login, std::string &ip, std::string &public_key, std::string &linux_dist, std::string &compiler,
        int major, int minor) {
     boost::property_tree::ptree root;
     root.put("login", login);
@@ -55,8 +54,8 @@ put_ip(std::string &login, std::string &ip, std::string &public_key, std::string
     std::ostringstream buf;
     boost::property_tree::write_json(buf, root, false);
     std::string json = buf.str();
-    std::cout << json << std::endl;
-    std::string target = "/nodes/2";
+
+    std::string target = "/nodes/";
     boost::asio::io_context ioc;
     boost::asio::ip::tcp::resolver resolver(ioc);
     boost::asio::ip::tcp::socket socket(ioc);

