@@ -10,7 +10,7 @@
 
 
 prog=ccmake_node
-lockfile=/temp/$prog
+lockfile=/tmp/$prog
 
 start() {
     #Make some checks for requirements before continuing
