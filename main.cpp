@@ -8,6 +8,7 @@
 #include "ccmake.h"
 #include "node_daemon/sys_spec.h"
 #include "node_daemon/requests.h"
+#include <thread>
 
 namespace fs = std::filesystem;
 
@@ -48,7 +49,7 @@ void link_whole_project(fs::path ccmake_directory, fs::path project_directory) {
                        ccmake_directory.append("scripts/link_whole.sh").string()).c_str());
 }
 
-void compile_to_static_lib(Node &n, std::vector<std::string> headers, std::vector<std::string> sources,
+void compile_to_static_lib(Node &n, std::vector<std::string> &headers, std::vector<std::string> &sources,
                            fs::path project_directory, int num) {
     //  Create library with working files
     n.execute_command("rm -rf ~/.project && mkdir .project", false);
@@ -99,17 +100,24 @@ int main(int argc, char **argv) {
     boost::split(headers, args->headers, boost::is_any_of(","));
     boost::split(sources, args->sources, boost::is_any_of(","));
 
+    ssh_init();
     std::vector<Node> nodes{};
     nodes.reserve(ips.size());
     for (auto &ip: ips)
         nodes.emplace_back(ip);
     int i = 0;
     std::vector<std::vector<std::string>> splitted_sources = split_vector(sources, nodes.size());
+    std::vector<std::thread> threads;
     for (auto &n: nodes) {
         n.connect();
-        compile_to_static_lib(n, headers, sources, project_directory, i++);
+        threads.emplace_back(compile_to_static_lib, std::ref(n), std::ref(headers),
+                             std::ref(splitted_sources[i]), project_directory, i);
+        i++;
     }
+    for (auto &t: threads)
+        t.join();
     fs::current_path(project_directory);
     link_whole_project(cur_directory, project_directory / "libs");
+    ssh_finalize();
     return 0;
 }
